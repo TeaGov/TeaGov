@@ -14,7 +14,7 @@ export function Footer({ className }: FooterProps) {
           <div className="md:col-span-1">
             <div className="flex items-center space-x-2 mb-4">
               <Coffee className="h-6 w-6 text-white" />
-              <span className="text-xl font-bold text-white">TEA Protocol</span>
+              <span className="text-xl font-bold text-white">Tea Gov</span>
             </div>
             <p className="text-white/80 text-sm">
               A decentralized finance protocol built on the TEA blockchain, enabling staking, governance, and community
@@ -33,20 +33,8 @@ export function Footer({ className }: FooterProps) {
                 </a>
               </li>
               <li>
-                <a href="#" className="text-white/70 hover:text-white text-sm flex items-center">
-                  <span>Whitepaper</span>
-                  <ExternalLink className="ml-1 h-3 w-3" />
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-white/70 hover:text-white text-sm flex items-center">
-                  <span>Security</span>
-                  <ExternalLink className="ml-1 h-3 w-3" />
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-white/70 hover:text-white text-sm flex items-center">
-                  <span>Roadmap</span>
+                <a href="https://sepolia.tea.xyz/address/0xD0501e868AEC9973E118B975E00E1d078c88D263" className="text-white/70 hover:text-white text-sm flex items-center">
+                  <span>Contract Address</span>
                   <ExternalLink className="ml-1 h-3 w-3" />
                 </a>
               </li>
@@ -71,12 +59,6 @@ export function Footer({ className }: FooterProps) {
               <li>
                 <a href="#" className="text-white/70 hover:text-white text-sm flex items-center">
                   <span>Community</span>
-                  <ExternalLink className="ml-1 h-3 w-3" />
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-white/70 hover:text-white text-sm flex items-center">
-                  <span>Tutorials</span>
                   <ExternalLink className="ml-1 h-3 w-3" />
                 </a>
               </li>
@@ -116,16 +98,16 @@ export function Footer({ className }: FooterProps) {
         </div>
 
         <div className="border-t border-white/10 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-white/70 text-sm">© {new Date().getFullYear()} TEA Protocol. All rights reserved.</p>
+          <p className="text-white/70 text-sm">© {new Date().getFullYear()} Tea Gov. All rights reserved.</p>
           <div className="flex space-x-6 mt-4 md:mt-0">
-            <a href="#" className="text-white/70 hover:text-white text-sm">
-              Terms of Service
-            </a>
-            <a href="#" className="text-white/70 hover:text-white text-sm">
-              Privacy Policy
-            </a>
-            <a href="#" className="text-white/70 hover:text-white text-sm">
-              Cookie Policy
+            <a
+              href="https://github.com/TeaGov/TeaGov/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/70 hover:text-white text-sm flex items-center"
+            >
+              <Github className="mr-1 h-4 w-4" />
+              <span>Source Code</span>
             </a>
           </div>
         </div>
