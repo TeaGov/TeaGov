@@ -1,10 +1,10 @@
-<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <g transform="translate(4, 4)">
-    <path d="M6 4C6 3.44772 6.44772 3 7 3C7.55228 3 8 3.44772 8 4C8 4.55228 7.55228 5 7 5C6.44772 5 6 4.55228 6 4Z" fill="#1A5F7A"/>
-    <path d="M10 4C10 3.44772 10.4477 3 11 3C11.5523 3 12 3.44772 12 4C12 4.55228 11.5523 5 11 5C10.4477 5 10 4.55228 10 4Z" fill="#1A5F7A"/>
-    <path d="M14 4C14 3.44772 14.4477 3 15 3C15.5523 3 16 3.44772 16 4C16 4.55228 15.5523 5 15 5C14.4477 5 14 4.55228 14 4Z" fill="#1A5F7A"/>
-    <path d="M18 14C18 16.2091 16.2091 18 14 18H6C3.79086 18 2 16.2091 2 14V10C2 7.79086 3.79086 6 6 6H14C16.2091 6 18 7.79086 18 10V14Z" fill="#1A5F7A"/>
-    <path d="M18 12H20C21.1046 12 22 11.1046 22 10V9C22 7.89543 21.1046 7 20 7H18V12Z" fill="#1A5F7A"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <circle cx="24" cy="24" r="24" fill="#0C4C67"/>
+  <g transform="translate(10, 9) scale(1.2)">
+    <path d="M17 8h1a4 4 0 1 1 0 8h-1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <line x1="6" y1="2" x2="6" y2="4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="10" y1="2" x2="10" y2="4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="14" y1="2" x2="14" y2="4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
 </svg>
-
