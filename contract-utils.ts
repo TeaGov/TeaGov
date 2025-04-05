@@ -1,11 +1,23 @@
 import { ethers } from "ethers"
 import { CONTRACT_ABI } from "./contract-abi"
+import { toast } from "react-toastify"
+
+// Update the TEA_SEPOLIA_RPC_URL to include the primary URL
+export const TEA_SEPOLIA_RPC_URL = "https://tea-sepolia.g.alchemy.com/public"
+
+// Add additional RPC URLs for fallback
+export const TEA_SEPOLIA_RPC_URLS = [
+  TEA_SEPOLIA_RPC_URL,
+  "https://tea-sepolia.g.alchemy.com/v2/GoDyTniLOkcBtdGRri_nfQVby6IIXYlV",
+  "https://tea-sepolia.g.alchemy.com/v2/q4K9s6hdnR_6PvH4CxjuY4N2-7NB_nh5",
+  "https://tea-sepolia.g.alchemy.com/v2/fAfbHbHgZl5jhsdqEDahVMv4dVSwZsop",
+]
 
 export const CONTRACT_ADDRESS = "0xD0501e868AEC9973E118B975E00E1d078c88D263"
-export const TEA_SEPOLIA_RPC_URL = "https://tea-sepolia.g.alchemy.com/public"
 
 // Add these constants for Tea Sepolia network
 export const TEA_SEPOLIA_CHAIN_ID = 10218
+// Update the Tea Sepolia network configuration to include all RPC URLs
 export const TEA_SEPOLIA_NETWORK = {
   chainId: `0x${TEA_SEPOLIA_CHAIN_ID.toString(16)}`, // '0x27ea' in hex
   chainName: "Tea Sepolia",
@@ -14,8 +26,8 @@ export const TEA_SEPOLIA_NETWORK = {
     symbol: "TEA",
     decimals: 18,
   },
-  rpcUrls: [TEA_SEPOLIA_RPC_URL],
-  blockExplorerUrls: ["https://explorer.teaprotocol.io/"],
+  rpcUrls: TEA_SEPOLIA_RPC_URLS,
+  blockExplorerUrls: ["https://sepolia.tea.xyz/"],
 }
 
 // Add sTEA token contract details
@@ -177,28 +189,50 @@ export const STEA_CONTRACT_ABI = [
 // Update the provider creation with better error handling and fallback mechanism
 const createProvider = () => {
   try {
-    console.log("Creating provider with TEA_SEPOLIA_RPC_URL:", TEA_SEPOLIA_RPC_URL)
-    const provider = new ethers.JsonRpcProvider(TEA_SEPOLIA_RPC_URL, undefined, {
+    console.log("Creating provider with TEA_SEPOLIA_RPC_URLs...")
+
+    // Try to create a provider with the first RPC URL
+    let provider = new ethers.JsonRpcProvider(TEA_SEPOLIA_RPC_URLS[0], undefined, {
       staticNetwork: true,
       polling: true,
-      pollingInterval: 4000, // Increase polling interval to reduce rate limiting issues
-      batchStallTime: 50, // Add small delay between batch requests
-      cacheTimeout: -1, // Disable cache to ensure fresh data
-      // Add retry options
+      pollingInterval: 4000,
+      batchStallTime: 50,
+      cacheTimeout: -1,
       retry: {
         retryFunc: (error, attempt) => {
           console.warn(`RPC request failed (attempt ${attempt}):`, error.message)
-          return attempt < 3 // Retry up to 3 times
+          return attempt < 3
         },
-        delay: 1000, // Start with 1s delay
-        maxDelay: 5000, // Max 5s delay
+        delay: 1000,
+        maxDelay: 5000,
       },
     })
 
-    // Test the connection
-    provider.getBlockNumber().catch((error) => {
+    // Test the connection and set up fallback mechanism
+    provider.getBlockNumber().catch(async (error) => {
       console.error("Failed to connect to primary RPC:", error)
-      console.warn("Provider may have connectivity issues")
+
+      // Try each fallback URL in sequence
+      for (let i = 1; i < TEA_SEPOLIA_RPC_URLS.length; i++) {
+        console.warn(`Trying fallback RPC URL #${i}...`)
+        try {
+          const fallbackProvider = new ethers.JsonRpcProvider(TEA_SEPOLIA_RPC_URLS[i], undefined, {
+            staticNetwork: true,
+            polling: true,
+            pollingInterval: 4000,
+            batchStallTime: 50,
+            cacheTimeout: -1,
+          })
+
+          // Test if this provider works
+          await fallbackProvider.getBlockNumber()
+          console.log(`Successfully connected to fallback RPC URL #${i}`)
+          provider = fallbackProvider
+          break
+        } catch (fallbackError) {
+          console.error(`Failed to connect to fallback RPC URL #${i}:`, fallbackError)
+        }
+      }
     })
 
     return provider
@@ -492,9 +526,24 @@ export const getDirectSTEALeaderboard = async () => {
     const uniqueAddresses = [...new Set(leaderboard[0])]
     console.log(`Found ${uniqueAddresses.length} unique addresses to check for sTEA balances`)
 
+    // Try to get as many addresses as possible - don't limit to 100
+    const addressesToCheck = uniqueAddresses
+    console.log(`Checking sTEA balances for ${addressesToCheck.length} addresses`)
+
+    // Show a loading message for long operations
+    let loadingToastId = null
+    if (addressesToCheck.length > 50) {
+      loadingToastId = toast.loading(
+        `Fetching balances for ${addressesToCheck.length} stakers, this may take a moment...`,
+        {
+          duration: 15000,
+        },
+      )
+    }
+
     // Process in smaller batches to avoid timeouts
-    const batchSize = 10
-    const batches = Math.ceil(uniqueAddresses.length / batchSize)
+    const batchSize = 15 // Increased batch size for faster processing
+    const batches = Math.ceil(addressesToCheck.length / batchSize)
 
     // Store results
     const addressesWithBalance = []
@@ -502,12 +551,12 @@ export const getDirectSTEALeaderboard = async () => {
 
     for (let i = 0; i < batches; i++) {
       const startIdx = i * batchSize
-      const endIdx = Math.min(startIdx + batchSize, uniqueAddresses.length)
-      const batchAddresses = uniqueAddresses.slice(startIdx, endIdx)
+      const endIdx = Math.min(startIdx + batchSize, addressesToCheck.length)
+      const batchAddresses = addressesToCheck.slice(startIdx, endIdx)
 
       console.log(`Processing batch ${i + 1}/${batches} (${batchAddresses.length} addresses)`)
 
-      // Process batch in parallel
+      // Process batch in parallel with longer timeout for larger batches
       const batchPromises = batchAddresses.map((address) => {
         return Promise.race([
           // Get balance with timeout
@@ -523,8 +572,8 @@ export const getDirectSTEALeaderboard = async () => {
               return null
             }
           })(),
-          // 3-second timeout
-          new Promise((_, reject) => setTimeout(() => reject(new Error(`Timeout for ${address}`)), 3000)),
+          // 5-second timeout for larger batches
+          new Promise((_, reject) => setTimeout(() => reject(new Error(`Timeout for ${address}`)), 5000)),
         ]).catch((error) => {
           console.warn(error.message)
           return null
@@ -543,8 +592,13 @@ export const getDirectSTEALeaderboard = async () => {
 
       // Add a small delay between batches
       if (i < batches - 1) {
-        await new Promise((resolve) => setTimeout(resolve, 200))
+        await new Promise((resolve) => setTimeout(resolve, 100))
       }
+    }
+
+    // Dismiss loading toast if it was shown
+    if (loadingToastId) {
+      toast.dismiss(loadingToastId)
     }
 
     // Sort by balance (descending)
